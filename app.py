@@ -869,24 +869,47 @@ if page == "Overview":
         wc_df_ov = wc_res[0] if wc_res else None
 
         c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            kpi_card("Total Mines", f"{fdf['Mine_ID'].nunique()}", "in current selection", accent=NEUTRAL)
-        with c2:
-            kpi_card("Total Production", format_num(fdf["Production"].sum()), "tonnes",
-                      accent=PLOT_COLORS["production"],
-                      change_pct=_wc_lookup(wc_df_ov, "Production") if wc_df_ov is not None else None,
-                      higher_is_good=True, change_suffix=" vs prev. year")
-        with c3:
-            kpi_card("Total Safety Incidents", f"{int(fdf['Safety_Incidents'].sum()):,}", "",
-                      accent=PLOT_COLORS["safety"],
-                      change_pct=_wc_lookup(wc_df_ov, "Safety Incidents") if wc_df_ov is not None else None,
-                      higher_is_good=False, change_suffix=" vs prev. year")
-        with c4:
-            kpi_card("Total Violations", f"{int(fdf['Violations'].sum()):,}", "",
-                      accent=PLOT_COLORS["violations"],
-                      change_pct=_wc_lookup(wc_df_ov, "Violations") if wc_df_ov is not None else None,
-                      higher_is_good=False, change_suffix=" vs prev. year")
 
+        with c1:
+             kpi_card(
+                         "Total Mines",
+            f"{fdf['Mine_ID'].nunique()}",
+                "in current selection",
+             accent=NEUTRAL
+                )
+
+        with c2:
+            kpi_card(
+                    "Total Production",
+                 format_num(fdf["Production"].sum()),
+             "tonnes",
+                accent=PLOT_COLORS["production"],
+             change_pct=_wc_lookup(wc_df_ov, "Production") if wc_df_ov is not None else None,
+             higher_is_good=True,
+                change_suffix=" vs prev. year"
+                )
+
+        with c3:
+                    kpi_card(
+                    "Total Safety Incidents",
+                      f"{int(fdf['Safety_Incidents'].sum()):,}",
+                  "",
+                         accent=PLOT_COLORS["safety"],
+                     change_pct=_wc_lookup(wc_df_ov, "Safety Incidents") if wc_df_ov is not None else None,
+                     higher_is_good=False,
+                    change_suffix=" vs prev. year"
+                     )
+
+        with c4:
+                kpi_card(
+                        "Total Violations",
+                f"{int(fdf['Violations'].sum()):,}",
+                "",
+                accent=PLOT_COLORS["violations"],
+                change_pct=_wc_lookup(wc_df_ov, "Violations") if wc_df_ov is not None else None,
+                 higher_is_good=False,
+                change_suffix=" vs prev. year"
+            )
         c5, c6, c7, c8 = st.columns(4)
         with c5:
             kpi_card("Total Revenue", format_num(fdf["Revenue"].sum()), "indexed units",
