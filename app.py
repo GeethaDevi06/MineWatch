@@ -55,18 +55,78 @@ VIOLATION_CATEGORIES_CANON = ["Safety", "Environmental", "Operational",
                                "Equipment", "Documentation", "Emergency Preparedness"]
 MINE_TYPE_CANON = ["Open Cast", "Underground", "Mixed"]
 
-ACCENT = "#E8A33D"      # industrial amber
-ACCENT_2 = "#4C8CBF"    # steel blue
-BG = "#161A20"
-PANEL = "#1F242C"
-PANEL_BORDER = "#2E3540"
-TEXT = "#E9E7E2"
-MUTED = "#93A0AC"
-GOOD = "#5FA777"
-WARN = "#D9714E"
+# --------------------------------------------------
+# 2a. SEMANTIC COLOR SYSTEM
+# --------------------------------------------------
+# Brand / primary
+PRIMARY = "#F2A93B"        # amber / gold - branding, primary actions, production highlights
+# Operations (production, productivity, energy)
+OPERATIONS = "#4EA1D8"     # steel blue
+# Environment (waste, environmental indicators, sustainability)
+ENVIRONMENT = "#45C2B1"    # teal / green
+# Safety & alerts (incidents, violations, critical alerts, negative change)
+SAFETY = "#E56B5D"         # red / coral
+# Positive / completed
+POSITIVE = "#62B58A"       # muted green
+# Secondary analytics (forecasting, AI insights)
+SECONDARY = "#9A86D8"      # purple
+# Cost (economics)
+COST = "#C98A5B"           # muted orange
+# Neutral / reference
+NEUTRAL = "#77838F"
+
+# Backgrounds
+BG = "#0B0F14"
+SIDEBAR_BG = "#10161D"
+CARD_BG = "#151C24"
+CARD_BG_2 = "#1A222C"
+BORDER = "#28323D"
+
+# Text
+TEXT = "#F2F4F5"
+TEXT_SECONDARY = "#A8B2BD"
+TEXT_MUTED = "#77838F"
+
+# Backwards-compatible aliases used deeper in the file
+ACCENT = PRIMARY
+ACCENT_2 = OPERATIONS
+PANEL = CARD_BG
+PANEL_BORDER = BORDER
+MUTED = TEXT_SECONDARY
+GOOD = POSITIVE
+WARN = SAFETY
 
 PLOTLY_TEMPLATE = "plotly_dark"
-CHART_COLORWAY = [ACCENT, ACCENT_2, "#8B7FD1", "#5FA777", "#D9714E", "#C9CF54", "#4FBFB0"]
+CHART_COLORWAY = [PRIMARY, OPERATIONS, ENVIRONMENT, SAFETY, POSITIVE, SECONDARY, COST, NEUTRAL]
+
+# Reusable semantic Plotly color map — same metric, same color, everywhere.
+PLOT_COLORS = {
+    "production": PRIMARY,
+    "productivity": OPERATIONS,
+    "energy": OPERATIONS,
+    "environment": ENVIRONMENT,
+    "waste": ENVIRONMENT,
+    "safety": SAFETY,
+    "violations": SAFETY,
+    "completed": POSITIVE,
+    "pending": PRIMARY,
+    "revenue": OPERATIONS,
+    "cost": COST,
+    "profit": POSITIVE,
+    "forecast": SECONDARY,
+    "historical": OPERATIONS,
+    "reserve_initial": NEUTRAL,
+    "reserve_remaining": OPERATIONS,
+    "neutral": NEUTRAL,
+}
+
+# Risk palette: low -> muted green, medium -> amber, high -> coral (restrained, not neon)
+RISK_COLORSCALE = [
+    [0.0, "#2E6B54"],
+    [0.35, POSITIVE],
+    [0.6, PRIMARY],
+    [1.0, SAFETY],
+]
 
 # ==================================================
 # 3. CUSTOM CSS
@@ -84,9 +144,18 @@ html, body, [class*="css"]  {{
     color: {TEXT};
 }}
 
+.block-container {{
+    max-width: 1400px;
+    padding-top: 1.6rem;
+    padding-bottom: 2.5rem;
+}}
+
 section[data-testid="stSidebar"] {{
-    background-color: {PANEL};
-    border-right: 1px solid {PANEL_BORDER};
+    background-color: {SIDEBAR_BG};
+    border-right: 1px solid {BORDER};
+}}
+section[data-testid="stSidebar"] .block-container {{
+    padding-top: 1.2rem;
 }}
 
 h1, h2, h3, h4 {{
@@ -95,64 +164,236 @@ h1, h2, h3, h4 {{
     color: {TEXT};
 }}
 
+/* ---------- Page header ---------- */
 .mw-eyebrow {{
-    color: {ACCENT};
-    font-size: 0.8rem;
-    letter-spacing: 0.02em;
-    margin-bottom: -0.6rem;
+    color: {PRIMARY};
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-bottom: 0.15rem;
+}}
+.mw-page-title {{
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: {TEXT};
+    margin-bottom: 0.15rem;
+    line-height: 1.2;
+}}
+.mw-page-sub {{
+    color: {TEXT_SECONDARY};
+    font-size: 0.92rem;
+    margin-bottom: 1.1rem;
+}}
+.mw-header-block {{
+    margin-bottom: 1.3rem;
 }}
 
+/* ---------- KPI cards ---------- */
 .mw-kpi-card {{
-    background-color: {PANEL};
-    border: 1px solid {PANEL_BORDER};
-    border-radius: 6px;
-    padding: 14px 16px;
+    background-color: {CARD_BG};
+    border: 1px solid {BORDER};
+    border-left: 3px solid var(--mw-accent, {PRIMARY});
+    border-radius: 11px;
+    padding: 14px 18px;
     height: 100%;
+    min-height: 104px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}}
+.mw-kpi-card:hover {{
+    border-color: var(--mw-accent, {PRIMARY});
+    transform: translateY(-1px);
 }}
 .mw-kpi-label {{
-    color: {MUTED};
-    font-size: 0.78rem;
-    margin-bottom: 4px;
+    color: {TEXT_MUTED};
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }}
 .mw-kpi-value {{
     font-family: 'IBM Plex Mono', monospace;
     font-size: 1.55rem;
     font-weight: 600;
     color: {TEXT};
+    line-height: 1.15;
 }}
 .mw-kpi-sub {{
-    font-size: 0.72rem;
-    color: {MUTED};
-    margin-top: 2px;
+    font-size: 0.76rem;
+    color: {TEXT_SECONDARY};
 }}
+.mw-kpi-change {{
+    font-size: 0.76rem;
+    font-weight: 600;
+}}
+.mw-change-up-good {{ color: {POSITIVE}; }}
+.mw-change-up-bad {{ color: {SAFETY}; }}
+.mw-change-down-good {{ color: {POSITIVE}; }}
+.mw-change-down-bad {{ color: {SAFETY}; }}
+.mw-change-neutral {{ color: {TEXT_MUTED}; }}
 
+/* ---------- Generic panel ---------- */
 .mw-panel {{
-    background-color: {PANEL};
-    border: 1px solid {PANEL_BORDER};
-    border-radius: 6px;
-    padding: 16px 18px;
+    background-color: {CARD_BG};
+    border: 1px solid {BORDER};
+    border-radius: 11px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+}}
+.mw-panel-2 {{
+    background-color: {CARD_BG_2};
+    border: 1px solid {BORDER};
+    border-radius: 11px;
+    padding: 16px 20px;
     margin-bottom: 14px;
 }}
 
-.mw-finding {{
-    border-left: 3px solid {ACCENT};
-    padding: 6px 12px;
-    margin-bottom: 8px;
-    background-color: rgba(232, 163, 61, 0.06);
-    font-size: 0.92rem;
+/* ---------- Findings ---------- */
+.mw-finding-card {{
+    background-color: {CARD_BG};
+    border: 1px solid {BORDER};
+    border-left: 3px solid var(--mw-accent, {PRIMARY});
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+}}
+.mw-finding-cat {{
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--mw-accent, {PRIMARY});
+    margin-bottom: 3px;
+}}
+.mw-finding-text {{
+    font-size: 0.9rem;
+    color: {TEXT};
 }}
 
+/* ---------- What changed ---------- */
+.mw-wc-row {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 4px;
+    border-bottom: 1px solid {BORDER};
+}}
+.mw-wc-row:last-child {{ border-bottom: none; }}
+.mw-wc-label {{ color: {TEXT_SECONDARY}; font-size: 0.86rem; }}
+.mw-wc-value {{ font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 0.9rem; }}
+
+/* ---------- Badges ---------- */
 .mw-badge {{
     display: inline-block;
-    padding: 2px 9px;
+    padding: 3px 10px;
     border-radius: 999px;
-    font-size: 0.72rem;
-    background-color: rgba(76, 140, 191, 0.18);
-    color: {ACCENT_2};
-    border: 1px solid rgba(76, 140, 191, 0.35);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    background-color: rgba(154, 134, 216, 0.14);
+    color: {SECONDARY};
+    border: 1px solid rgba(154, 134, 216, 0.35);
+}}
+.mw-badge-blue {{
+    background-color: rgba(78, 161, 216, 0.14);
+    color: {OPERATIONS};
+    border: 1px solid rgba(78, 161, 216, 0.35);
 }}
 
-hr {{ border-color: {PANEL_BORDER}; }}
+/* ---------- Sidebar nav ---------- */
+.mw-sidebar-title {{
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: {TEXT};
+    letter-spacing: 0.02em;
+    margin-bottom: 0;
+}}
+.mw-sidebar-caption {{
+    color: {TEXT_MUTED};
+    font-size: 0.75rem;
+    margin-top: -4px;
+    margin-bottom: 0.6rem;
+}}
+.mw-nav-section {{
+    color: {TEXT_MUTED};
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0.75rem 0 0.15rem 0;
+}}
+section[data-testid="stSidebar"] div[role="radiogroup"] label {{
+    padding: 2px 0;
+}}
+section[data-testid="stSidebar"] input[type="radio"] {{
+    accent-color: {PRIMARY};
+}}
+
+/* ---------- Info boxes ---------- */
+.mw-info-box {{
+    background-color: rgba(154, 134, 216, 0.08);
+    border: 1px solid rgba(154, 134, 216, 0.30);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: {TEXT_SECONDARY};
+    margin-top: 8px;
+}}
+.mw-disclaimer {{
+    font-size: 0.76rem;
+    color: {TEXT_MUTED};
+    font-style: italic;
+    margin-top: 6px;
+}}
+
+/* ---------- Empty state ---------- */
+.mw-empty-state {{
+    background-color: {CARD_BG};
+    border: 1px dashed {BORDER};
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: {TEXT_SECONDARY};
+    margin: 12px 0;
+}}
+.mw-empty-icon {{
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    opacity: 0.6;
+}}
+.mw-empty-title {{
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: {TEXT_MUTED};
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}}
+
+/* ---------- Mine profile ---------- */
+.mw-profile-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px 24px;
+    margin-top: 8px;
+}}
+.mw-profile-item-label {{
+    font-size: 0.68rem;
+    color: {TEXT_MUTED};
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}}
+.mw-profile-item-value {{
+    font-size: 0.95rem;
+    color: {TEXT};
+    font-weight: 600;
+}}
+
+hr {{ border-color: {BORDER}; }}
 
 [data-testid="stMetricValue"] {{
     font-family: 'IBM Plex Mono', monospace;
@@ -162,7 +403,7 @@ hr {{ border-color: {PANEL_BORDER}; }}
 
 
 # ==================================================
-# 4. DATA LOADING
+# 4. DATA LOADING  (unchanged logic)
 # ==================================================
 @st.cache_data(show_spinner="Loading MineWatch dataset...")
 def load_raw_data(path):
@@ -249,12 +490,44 @@ def pct_change(new, old):
     return (new - old) / abs(old) * 100.0
 
 
-def kpi_card(label, value, sub=""):
+def page_header(eyebrow, title, sub=""):
+    """Consistent SMALL LABEL / big title / one-line description header."""
     st.markdown(f"""
-    <div class="mw-kpi-card">
+    <div class="mw-header-block">
+        <div class="mw-eyebrow">{eyebrow}</div>
+        <div class="mw-page-title">{title}</div>
+        {f'<div class="mw-page-sub">{sub}</div>' if sub else ''}
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def _change_class(change_pct, higher_is_good=True):
+    if change_pct is None:
+        return "mw-change-neutral", ""
+    up = change_pct >= 0
+    good = (up and higher_is_good) or (not up and not higher_is_good)
+    arrow = "\u2191" if up else "\u2193"
+    cls = "mw-change-up-good" if (up and good) else \
+          "mw-change-up-bad" if (up and not good) else \
+          "mw-change-down-good" if (not up and good) else "mw-change-down-bad"
+    return cls, f"{arrow} {abs(change_pct):.1f}%"
+
+
+def kpi_card(label, value, sub="", accent=None, change_pct=None, higher_is_good=True, change_suffix=""):
+    """Semantic KPI card: uppercase label, big value, subtitle, optional colored change indicator,
+    subtle colored left border matching the metric's semantic accent."""
+    accent = accent or PRIMARY
+    change_html = ""
+    if change_pct is not None:
+        cls, txt = _change_class(change_pct, higher_is_good)
+        if txt:
+            change_html = f'<div class="mw-kpi-change {cls}">{txt}{change_suffix}</div>'
+    st.markdown(f"""
+    <div class="mw-kpi-card" style="--mw-accent: {accent};">
         <div class="mw-kpi-label">{label}</div>
         <div class="mw-kpi-value">{value}</div>
-        <div class="mw-kpi-sub">{sub}</div>
+        {f'<div class="mw-kpi-sub">{sub}</div>' if sub else ''}
+        {change_html}
     </div>
     """, unsafe_allow_html=True)
 
@@ -262,25 +535,28 @@ def kpi_card(label, value, sub=""):
 def style_fig(fig, title=None, height=420):
     fig.update_layout(
         template=PLOTLY_TEMPLATE,
-        paper_bgcolor=PANEL,
-        plot_bgcolor=PANEL,
-        font=dict(color=TEXT, family="IBM Plex Sans"),
+        paper_bgcolor=CARD_BG,
+        plot_bgcolor=CARD_BG,
+        font=dict(color=TEXT, family="IBM Plex Sans", size=12),
         colorway=CHART_COLORWAY,
-        title=title,
+        title=dict(text=title, font=dict(size=15, color=TEXT)) if title else None,
         height=height,
         margin=dict(l=10, r=10, t=50 if title else 20, b=10),
-        legend=dict(bgcolor="rgba(0,0,0,0)"),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
+        hoverlabel=dict(bgcolor=CARD_BG_2, font=dict(color=TEXT, size=12), bordercolor=BORDER),
     )
-    fig.update_xaxes(gridcolor=PANEL_BORDER, zerolinecolor=PANEL_BORDER)
-    fig.update_yaxes(gridcolor=PANEL_BORDER, zerolinecolor=PANEL_BORDER)
+    fig.update_xaxes(gridcolor=BORDER, zerolinecolor=BORDER, showline=False)
+    fig.update_yaxes(gridcolor=BORDER, zerolinecolor=BORDER, showline=False)
     return fig
 
 
 def empty_state():
     st.markdown("""
-    <div class="mw-panel">
-    <b>No records match the selected filters.</b><br>
-    Try changing or resetting the filters in the sidebar.
+    <div class="mw-empty-state">
+        <div class="mw-empty-icon">&#9723;</div>
+        <div class="mw-empty-title">No data for current filters</div>
+        The selected filters do not return any records.<br>
+        Try removing one or more filters from the sidebar.
     </div>
     """, unsafe_allow_html=True)
 
@@ -309,11 +585,80 @@ def format_num(x, decimals=0, suffix=""):
     return f"{x:,.{decimals}f}{suffix}"
 
 
+def finding_card(category, text, accent=None):
+    accent = accent or PRIMARY
+    st.markdown(f"""
+    <div class="mw-finding-card" style="--mw-accent: {accent};">
+        <div class="mw-finding-cat">{category}</div>
+        <div class="mw-finding-text">{text}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def classify_finding(text):
+    """Pick a semantic category + accent for a rule-based finding sentence,
+    purely for display — does not alter the underlying analytical text."""
+    t = text.lower()
+    if "safety incident" in t:
+        return "SAFETY", SAFETY
+    if "violation" in t:
+        return "VIOLATIONS", SAFETY
+    if "pending corrective" in t:
+        return "CORRECTIVE ACTIONS", PRIMARY
+    if "environmental" in t:
+        return "ENVIRONMENT", ENVIRONMENT
+    if "waste" in t:
+        return "ENVIRONMENT", ENVIRONMENT
+    if "energy" in t:
+        return "ENERGY", OPERATIONS
+    if "profit" in t:
+        return "ECONOMICS", POSITIVE
+    if "productivity" in t:
+        return "PRODUCTIVITY", OPERATIONS
+    if "production" in t:
+        return "PRODUCTION", PRIMARY
+    return "OBSERVATION", NEUTRAL
+
+
+def what_changed_panel(wc_df, prev_y, last_y):
+    """Compact WHAT CHANGED? comparison panel with metric-aware coloring."""
+    # metric -> higher_is_good
+    directionality = {
+        "Production": True,
+        "Productivity (avg)": True,
+        "Safety Incidents": False,
+        "Violations": False,
+        "Profit": True,
+        "Energy Intensity": False,
+        "Waste Intensity": False,
+    }
+    rows_html = []
+    for _, row in wc_df.iterrows():
+        metric = row["Metric"]
+        change = row["Change %"]
+        higher_good = directionality.get(metric, True)
+        cls, txt = _change_class(change, higher_good)
+        if not txt:
+            txt = "-"
+            cls = "mw-change-neutral"
+        rows_html.append(
+            f'<div class="mw-wc-row"><span class="mw-wc-label">{metric}</span>'
+            f'<span class="mw-wc-value {cls}">{txt}</span></div>'
+        )
+    st.markdown(f"""
+    <div class="mw-panel">
+        <div class="mw-eyebrow" style="margin-bottom:6px;">WHAT CHANGED? &middot; {prev_y} vs {last_y}</div>
+        {''.join(rows_html)}
+    </div>
+    """, unsafe_allow_html=True)
+
+
 # ==================================================
 # 6. SIDEBAR - FILTERS & NAVIGATION
 # ==================================================
-st.sidebar.markdown("## \u26CF\uFE0F MINEWATCH")
-st.sidebar.caption("Mining Production, Safety & Environmental Analytics")
+st.sidebar.markdown('<div class="mw-sidebar-title">\u26CF\uFE0F MINEWATCH</div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="mw-sidebar-caption">Mining Analytics Platform</div>', unsafe_allow_html=True)
+st.sidebar.markdown("---")
 
 NAV_OPTIONS = [
     "Overview",
@@ -328,23 +673,31 @@ NAV_OPTIONS = [
     "Safety Trends",
     "Violations",
     "Risk Heatmap",
-    "— Other —",
+    "— Analysis —",
     "Environment",
     "Economics",
     "Regional Performance",
     "Forecasting",
     "Mine Explorer",
+    "— Tools —",
     "AI Insights",
     "Data Explorer",
     "About Project",
 ]
 SELECTABLE = [o for o in NAV_OPTIONS if not o.startswith("—")]
 
-st.sidebar.markdown("### Navigate")
+
+def _format_nav(x):
+    if x.startswith("—"):
+        return x.strip("— ").upper()
+    return f"  {x}"
+
+
+st.sidebar.markdown('<div class="mw-nav-section">Navigation</div>', unsafe_allow_html=True)
 page = st.sidebar.radio(
     "Navigate",
     options=NAV_OPTIONS,
-    format_func=lambda x: x,
+    format_func=_format_nav,
     label_visibility="collapsed",
 )
 if page.startswith("—"):
@@ -352,7 +705,7 @@ if page.startswith("—"):
     page = "Overview"
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### Filters")
+st.sidebar.markdown('<div class="mw-nav-section">Global Filters</div>', unsafe_allow_html=True)
 
 if st.sidebar.button("\u21BB Reset Filters", use_container_width=True):
     for k in list(st.session_state.keys()):
@@ -410,7 +763,7 @@ fdf = apply_filters(df)
 
 
 # ==================================================
-# 7. FINDINGS ENGINE
+# 7. FINDINGS ENGINE  (unchanged logic)
 # ==================================================
 def generate_findings(frame):
     """Rule-based findings computed purely from the (filtered) data."""
@@ -493,86 +846,116 @@ def what_changed(frame, period_col_years):
     return pd.DataFrame(out), prev_y, last_y
 
 
+def _wc_lookup(wc_df, metric):
+    v = wc_df.loc[wc_df.Metric == metric, "Change %"]
+    return float(v.iloc[0]) if len(v) and v.iloc[0] is not None else None
+
+
 # ==================================================
 # 8. OVERVIEW
 # ==================================================
 if page == "Overview":
-    st.markdown('<div class="mw-eyebrow">MINEWATCH V2</div>', unsafe_allow_html=True)
-    st.title("Mining Production, Safety & Environmental Analytics")
-    st.caption(
-        "MineWatch analyses mining production, productivity, safety, environmental and "
-        "economic data to identify trends, recurring issues and areas requiring attention. "
-        "Academic EDA prototype — synthetic data — not an official compliance system."
+    page_header(
+        "MineWatch V2",
+        "Mining Production, Safety & Environmental Analytics",
+        "Explore production, safety, environmental and economic trends across the portfolio. "
+        "Academic EDA prototype - synthetic data - not an official compliance system."
     )
 
     if fdf.empty:
         empty_state()
     else:
+        wc_res = what_changed(fdf, "Year")
+        wc_df_ov = wc_res[0] if wc_res else None
+
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            kpi_card("Total Mines", f"{fdf['Mine_ID'].nunique()}", "in current selection")
+            kpi_card("Total Mines", f"{fdf['Mine_ID'].nunique()}", "in current selection", accent=NEUTRAL)
         with c2:
-            kpi_card("Total Production", format_num(fdf["Production"].sum()), "tonnes")
+            kpi_card("Total Production", format_num(fdf["Production"].sum()), "tonnes",
+                      accent=PLOT_COLORS["production"],
+                      change_pct=_wc_lookup(wc_df_ov, "Production") if wc_df_ov is not None else None,
+                      higher_is_good=True, change_suffix=" vs prev. year")
         with c3:
-            kpi_card("Total Safety Incidents", f"{int(fdf['Safety_Incidents'].sum()):,}", "")
+            kpi_card("Total Safety Incidents", f"{int(fdf['Safety_Incidents'].sum()):,}", "",
+                      accent=PLOT_COLORS["safety"],
+                      change_pct=_wc_lookup(wc_df_ov, "Safety Incidents") if wc_df_ov is not None else None,
+                      higher_is_good=False, change_suffix=" vs prev. year")
         with c4:
-            kpi_card("Total Violations", f"{int(fdf['Violations'].sum()):,}", "")
+            kpi_card("Total Violations", f"{int(fdf['Violations'].sum()):,}", "",
+                      accent=PLOT_COLORS["violations"],
+                      change_pct=_wc_lookup(wc_df_ov, "Violations") if wc_df_ov is not None else None,
+                      higher_is_good=False, change_suffix=" vs prev. year")
 
         c5, c6, c7, c8 = st.columns(4)
         with c5:
-            kpi_card("Total Revenue", format_num(fdf["Revenue"].sum()), "indexed units")
+            kpi_card("Total Revenue", format_num(fdf["Revenue"].sum()), "indexed units",
+                      accent=PLOT_COLORS["revenue"])
         with c6:
-            kpi_card("Total Profit", format_num(fdf["Profit"].sum()), "indexed units")
+            kpi_card("Total Profit", format_num(fdf["Profit"].sum()), "indexed units",
+                      accent=PLOT_COLORS["profit"],
+                      change_pct=_wc_lookup(wc_df_ov, "Profit") if wc_df_ov is not None else None,
+                      higher_is_good=True, change_suffix=" vs prev. year")
         with c7:
-            kpi_card("Avg Productivity", f"{fdf['Productivity_Index'].mean():.2f}", "tonnes/hour")
+            kpi_card("Avg Productivity", f"{fdf['Productivity_Index'].mean():.2f}", "tonnes/hour",
+                      accent=PLOT_COLORS["productivity"])
         with c8:
-            kpi_card("Pending Actions", f"{int(fdf['Pending_Actions'].sum()):,}", "")
+            kpi_card("Pending Actions", f"{int(fdf['Pending_Actions'].sum()):,}", "",
+                      accent=PLOT_COLORS["pending"])
 
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             trend = fdf.groupby("Date", as_index=False)["Production"].sum()
             fig = px.line(trend, x="Date", y="Production")
+            fig.update_traces(line_color=PLOT_COLORS["production"])
             st.plotly_chart(style_fig(fig, "Production Trend"), use_container_width=True)
         with col2:
             trend2 = fdf.groupby("Date", as_index=False)["Safety_Incidents"].sum()
             fig = px.line(trend2, x="Date", y="Safety_Incidents")
-            fig.update_traces(line_color=WARN)
+            fig.update_traces(line_color=PLOT_COLORS["safety"])
             st.plotly_chart(style_fig(fig, "Safety Incident Trend"), use_container_width=True)
 
         col3, col4 = st.columns(2)
         with col3:
             fig = px.scatter(fdf, x="Production", y="Environmental_Impact",
-                              color="Region", opacity=0.6)
+                              color="Region", opacity=0.7)
             st.plotly_chart(style_fig(fig, "Production vs Environmental Impact"), use_container_width=True)
         with col4:
             econ = fdf.groupby("Date", as_index=False)[["Revenue", "Operating_Cost"]].sum()
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=econ["Date"], y=econ["Revenue"], name="Revenue"))
-            fig.add_trace(go.Scatter(x=econ["Date"], y=econ["Operating_Cost"], name="Operating Cost"))
+            fig.add_trace(go.Scatter(x=econ["Date"], y=econ["Revenue"], name="Revenue",
+                                      line=dict(color=PLOT_COLORS["revenue"])))
+            fig.add_trace(go.Scatter(x=econ["Date"], y=econ["Operating_Cost"], name="Operating Cost",
+                                      line=dict(color=PLOT_COLORS["cost"])))
             st.plotly_chart(style_fig(fig, "Cost vs Revenue"), use_container_width=True)
 
         region_perf = fdf.groupby("Region", as_index=False).agg(
             Production=("Production", "sum"), Productivity=("Productivity_Index", "mean"))
         fig = px.bar(region_perf.sort_values("Production", ascending=False),
-                     x="Region", y="Production")
+                     x="Region", y="Production", color_discrete_sequence=[PLOT_COLORS["production"]])
         st.plotly_chart(style_fig(fig, "Regional Performance"), use_container_width=True)
 
         st.markdown("### Key Findings")
         findings = generate_findings(fdf)
         if findings:
             for fnd in findings:
-                st.markdown(f'<div class="mw-finding">{fnd}</div>', unsafe_allow_html=True)
+                cat, accent = classify_finding(fnd)
+                finding_card(cat, fnd, accent=accent)
         else:
             st.caption("Select a broader range of years to generate trend-based findings.")
+
+        if wc_res:
+            st.markdown("<br>", unsafe_allow_html=True)
+            what_changed_panel(*wc_res)
 
 
 # ==================================================
 # 9. OPERATIONS - PRODUCTION
 # ==================================================
 elif page == "Production":
-    st.title("Production")
-    st.caption("Understand how mining production changes over time.")
+    page_header("OPERATIONS", "Mining Production",
+                "Explore production trends, mine output and regional share over time.")
     if fdf.empty:
         empty_state()
     else:
@@ -580,17 +963,19 @@ elif page == "Production":
         group_col = "Date" if agg_level == "Monthly" else "Year"
         trend = fdf.groupby(group_col, as_index=False)["Production"].sum()
         fig = px.line(trend, x=group_col, y="Production", markers=(agg_level == "Yearly"))
+        fig.update_traces(line_color=PLOT_COLORS["production"])
         st.plotly_chart(style_fig(fig, f"{agg_level} Production Trend", height=460), use_container_width=True)
 
         col1, col2 = st.columns(2)
         with col1:
             by_mine = fdf.groupby("Mine_ID", as_index=False)["Production"].sum().sort_values(
                 "Production", ascending=False).head(15)
-            fig = px.bar(by_mine, x="Mine_ID", y="Production")
+            fig = px.bar(by_mine, x="Mine_ID", y="Production",
+                         color_discrete_sequence=[PLOT_COLORS["production"]])
             st.plotly_chart(style_fig(fig, "Top 15 Mines by Production"), use_container_width=True)
         with col2:
             by_region = fdf.groupby("Region", as_index=False)["Production"].sum()
-            fig = px.pie(by_region, names="Region", values="Production", hole=0.45)
+            fig = px.pie(by_region, names="Region", values="Production", hole=0.55)
             st.plotly_chart(style_fig(fig, "Production Share by Region"), use_container_width=True)
 
 
@@ -598,16 +983,14 @@ elif page == "Production":
 # RESERVES
 # ==================================================
 elif page == "Reserves":
-    st.title("Reserve Depletion")
-    st.caption(
-        "This is an analytical reserve-depletion model based on the project dataset and "
-        "is not an official reserve estimate."
-    )
+    page_header("OPERATIONS", "Reserve Depletion",
+                "Analytical reserve-depletion model based on the project dataset - not an official reserve estimate.")
     if fdf.empty:
         empty_state()
     else:
         trend = fdf.groupby("Date", as_index=False)["Remaining_Reserve"].sum()
-        fig = px.area(trend, x="Date", y="Remaining_Reserve")
+        fig = px.area(trend, x="Date", y="Remaining_Reserve",
+                       color_discrete_sequence=[PLOT_COLORS["reserve_remaining"]])
         st.plotly_chart(style_fig(fig, "Remaining Reserve Over Time", height=460), use_container_width=True)
 
         latest_year = fdf["Year"].max()
@@ -616,8 +999,10 @@ elif page == "Reserves":
             Remaining_Reserve=("Remaining_Reserve", "last"))
         snap = snap.sort_values("Remaining_Reserve", ascending=False).head(20)
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=snap["Mine_ID"], y=snap["Initial_Reserve"], name="Initial Reserve"))
-        fig.add_trace(go.Bar(x=snap["Mine_ID"], y=snap["Remaining_Reserve"], name="Remaining Reserve"))
+        fig.add_trace(go.Bar(x=snap["Mine_ID"], y=snap["Initial_Reserve"], name="Initial Reserve",
+                              marker_color=PLOT_COLORS["reserve_initial"]))
+        fig.add_trace(go.Bar(x=snap["Mine_ID"], y=snap["Remaining_Reserve"], name="Remaining Reserve",
+                              marker_color=PLOT_COLORS["reserve_remaining"]))
         fig.update_layout(barmode="overlay")
         st.plotly_chart(style_fig(fig, f"Initial vs Remaining Reserve ({latest_year})"), use_container_width=True)
 
@@ -626,30 +1011,33 @@ elif page == "Reserves":
 # PRODUCTIVITY
 # ==================================================
 elif page == "Productivity":
-    st.title("Productivity Index")
-    st.caption("Productivity = Production / Working Hours — operational output relative to working-hour exposure.")
+    page_header("OPERATIONS", "Productivity Index",
+                "Production relative to working-hour exposure, across mines and regions.")
     if fdf.empty:
         empty_state()
     else:
         trend = fdf.groupby("Date", as_index=False)["Productivity_Index"].mean()
         fig = px.line(trend, x="Date", y="Productivity_Index")
+        fig.update_traces(line_color=PLOT_COLORS["productivity"])
         st.plotly_chart(style_fig(fig, "Productivity Trend", height=440), use_container_width=True)
 
         col1, col2 = st.columns(2)
         with col1:
             by_mine = fdf.groupby("Mine_ID", as_index=False)["Productivity_Index"].mean().sort_values(
                 "Productivity_Index", ascending=False).head(15)
-            fig = px.bar(by_mine, x="Mine_ID", y="Productivity_Index")
+            fig = px.bar(by_mine, x="Mine_ID", y="Productivity_Index",
+                         color_discrete_sequence=[PLOT_COLORS["productivity"]])
             st.plotly_chart(style_fig(fig, "Top 15 Mines by Productivity"), use_container_width=True)
         with col2:
             by_region = fdf.groupby("Region", as_index=False)["Productivity_Index"].mean()
             fig = px.bar(by_region.sort_values("Productivity_Index", ascending=False),
-                         x="Region", y="Productivity_Index")
+                         x="Region", y="Productivity_Index",
+                         color_discrete_sequence=[PLOT_COLORS["productivity"]])
             st.plotly_chart(style_fig(fig, "Productivity by Region"), use_container_width=True)
 
         st.markdown("#### Commodity Price vs Production")
         st.caption("The chart shows association, not causation.")
-        fig = px.scatter(fdf, x="Commodity_Price", y="Production", color="Commodity", opacity=0.6)
+        fig = px.scatter(fdf, x="Commodity_Price", y="Production", color="Commodity", opacity=0.7)
         st.plotly_chart(style_fig(fig, height=440), use_container_width=True)
 
 
@@ -657,22 +1045,24 @@ elif page == "Productivity":
 # EFFICIENCY - ENERGY
 # ==================================================
 elif page == "Energy":
-    st.title("Energy Consumption")
-    st.caption("Understand how energy demand changes with production.")
+    page_header("EFFICIENCY", "Energy Consumption",
+                "How energy demand changes with production and mine type.")
     if fdf.empty:
         empty_state()
     else:
         col1, col2 = st.columns(2)
         with col1:
-            fig = px.scatter(fdf, x="Production", y="Energy_Consumption", color="Mine_Type", opacity=0.6)
+            fig = px.scatter(fdf, x="Production", y="Energy_Consumption", color="Mine_Type", opacity=0.7)
             st.plotly_chart(style_fig(fig, "Production vs Energy Consumption"), use_container_width=True)
         with col2:
             trend = fdf.groupby("Date", as_index=False)["Energy_Intensity"].mean()
             fig = px.line(trend, x="Date", y="Energy_Intensity")
+            fig.update_traces(line_color=PLOT_COLORS["energy"])
             st.plotly_chart(style_fig(fig, "Energy Intensity Trend"), use_container_width=True)
 
         by_type = fdf.groupby("Mine_Type", as_index=False)["Energy_Consumption"].sum()
-        fig = px.bar(by_type, x="Mine_Type", y="Energy_Consumption")
+        fig = px.bar(by_type, x="Mine_Type", y="Energy_Consumption",
+                     color_discrete_sequence=[PLOT_COLORS["energy"]])
         st.plotly_chart(style_fig(fig, "Total Energy Consumption by Mine Type"), use_container_width=True)
 
 
@@ -680,19 +1070,19 @@ elif page == "Energy":
 # EFFICIENCY - WASTE
 # ==================================================
 elif page == "Waste":
-    st.title("Waste Generation")
-    st.caption("Analyse waste generation relative to production.")
+    page_header("EFFICIENCY", "Waste Generation",
+                "Waste generation relative to production, across regions.")
     if fdf.empty:
         empty_state()
     else:
         col1, col2 = st.columns(2)
         with col1:
-            fig = px.scatter(fdf, x="Production", y="Waste_Generation", color="Region", opacity=0.6)
+            fig = px.scatter(fdf, x="Production", y="Waste_Generation", color="Region", opacity=0.7)
             st.plotly_chart(style_fig(fig, "Production vs Waste Generation"), use_container_width=True)
         with col2:
             trend = fdf.groupby("Date", as_index=False)["Waste_Intensity"].mean()
             fig = px.line(trend, x="Date", y="Waste_Intensity")
-            fig.update_traces(line_color=WARN)
+            fig.update_traces(line_color=PLOT_COLORS["waste"])
             st.plotly_chart(style_fig(fig, "Waste Intensity Trend"), use_container_width=True)
 
 
@@ -700,26 +1090,28 @@ elif page == "Waste":
 # SAFETY & RISK - SAFETY TRENDS
 # ==================================================
 elif page == "Safety Trends":
-    st.title("Safety Trends")
-    st.caption("Historical safety analysis — not an accident prediction system.")
+    page_header("SAFETY & RISK", "Safety Trends",
+                "Historical safety analysis - not an accident prediction system.")
     if fdf.empty:
         empty_state()
     else:
         trend = fdf.groupby("Date", as_index=False)["Safety_Incidents"].sum()
         fig = px.line(trend, x="Date", y="Safety_Incidents")
-        fig.update_traces(line_color=WARN)
+        fig.update_traces(line_color=PLOT_COLORS["safety"])
         st.plotly_chart(style_fig(fig, "Safety Incidents Over Time", height=440), use_container_width=True)
 
         col1, col2 = st.columns(2)
         with col1:
             by_cat = fdf[fdf["Incident_Category"].notna()]["Incident_Category"].value_counts().reset_index()
             by_cat.columns = ["Incident_Category", "Count"]
-            fig = px.bar(by_cat, x="Incident_Category", y="Count")
+            fig = px.bar(by_cat, x="Incident_Category", y="Count",
+                         color_discrete_sequence=[PLOT_COLORS["safety"]])
             st.plotly_chart(style_fig(fig, "Incidents by Category"), use_container_width=True)
         with col2:
             by_sev = fdf[fdf["Severity"].notna()]["Severity"].value_counts().reset_index()
             by_sev.columns = ["Severity", "Count"]
-            fig = px.pie(by_sev, names="Severity", values="Count", hole=0.45)
+            fig = px.pie(by_sev, names="Severity", values="Count", hole=0.55,
+                         color_discrete_sequence=[POSITIVE, PRIMARY, "#C97A4A", SAFETY])
             st.plotly_chart(style_fig(fig, "Incidents by Severity"), use_container_width=True)
 
         by_mine = fdf.groupby("Mine_ID", as_index=False).agg(
@@ -727,7 +1119,8 @@ elif page == "Safety Trends":
             Working_Hours=("Working_Hours", "sum"))
         by_mine["Incident_Rate_per_1000h"] = (by_mine["Safety_Incidents"] / by_mine["Working_Hours"] * 1000)
         by_mine = by_mine.sort_values("Incident_Rate_per_1000h", ascending=False).head(15)
-        fig = px.bar(by_mine, x="Mine_ID", y="Incident_Rate_per_1000h")
+        fig = px.bar(by_mine, x="Mine_ID", y="Incident_Rate_per_1000h",
+                     color_discrete_sequence=[PLOT_COLORS["safety"]])
         st.plotly_chart(style_fig(fig, "Incident Rate per 1,000 Working Hours (Top 15 Mines)"),
                          use_container_width=True)
 
@@ -736,7 +1129,8 @@ elif page == "Safety Trends":
 # SAFETY & RISK - VIOLATIONS
 # ==================================================
 elif page == "Violations":
-    st.title("Violations")
+    page_header("SAFETY & RISK", "Violations",
+                "Violation categories, corrective actions and their resolution status.")
     if fdf.empty:
         empty_state()
     else:
@@ -744,23 +1138,27 @@ elif page == "Violations":
         with col1:
             by_cat = fdf[fdf["Violation_Category"].notna()]["Violation_Category"].value_counts().reset_index()
             by_cat.columns = ["Violation_Category", "Count"]
-            fig = px.bar(by_cat.sort_values("Count", ascending=False), x="Violation_Category", y="Count")
+            fig = px.bar(by_cat.sort_values("Count", ascending=False), x="Violation_Category", y="Count",
+                         color_discrete_sequence=[PLOT_COLORS["violations"]])
             st.plotly_chart(style_fig(fig, "Violations by Category"), use_container_width=True)
         with col2:
             trend = fdf.groupby("Year", as_index=False)["Violations"].sum()
-            fig = px.bar(trend, x="Year", y="Violations")
+            fig = px.bar(trend, x="Year", y="Violations",
+                         color_discrete_sequence=[PLOT_COLORS["violations"]])
             st.plotly_chart(style_fig(fig, "Violations by Year"), use_container_width=True)
 
         st.markdown("#### Violations vs Corrective Actions")
         va = fdf.groupby("Mine_ID", as_index=False).agg(
             Violations=("Violations", "sum"), Corrective_Actions=("Corrective_Actions", "sum"))
-        fig = px.scatter(va, x="Violations", y="Corrective_Actions", hover_name="Mine_ID")
+        fig = px.scatter(va, x="Violations", y="Corrective_Actions", hover_name="Mine_ID",
+                          color_discrete_sequence=[PLOT_COLORS["completed"]])
         st.plotly_chart(style_fig(fig), use_container_width=True)
 
         st.markdown("#### Corrective Action Status")
         status_counts = fdf["Action_Status"].value_counts().reset_index()
         status_counts.columns = ["Action_Status", "Count"]
-        fig = px.pie(status_counts, names="Action_Status", values="Count", hole=0.45)
+        fig = px.pie(status_counts, names="Action_Status", values="Count", hole=0.55,
+                     color_discrete_sequence=[POSITIVE, PRIMARY, SAFETY, NEUTRAL])
         st.plotly_chart(style_fig(fig), use_container_width=True)
 
 
@@ -768,7 +1166,8 @@ elif page == "Violations":
 # SAFETY & RISK - RISK HEATMAP
 # ==================================================
 elif page == "Risk Heatmap":
-    st.title("Year x Risk Factor Heatmap")
+    page_header("SAFETY & RISK", "Year x Risk Factor Heatmap",
+                "Where project-defined risk indicators run higher, by year, mine type and region.")
     st.caption(
         "Cell values are the average of the project-defined Risk_Factor "
         "(a 0-10 composite of safety incidents, violations and randomness) for each "
@@ -779,38 +1178,73 @@ elif page == "Risk Heatmap":
         empty_state()
     else:
         pivot = fdf.pivot_table(index="Year", columns="Mine_Type", values="Risk_Factor", aggfunc="mean")
-        fig = px.imshow(pivot, color_continuous_scale="Oranges", aspect="auto",
+        fig = px.imshow(pivot, color_continuous_scale=RISK_COLORSCALE, aspect="auto",
                          labels=dict(color="Avg Risk Factor"))
         st.plotly_chart(style_fig(fig, "Average Risk Factor by Year and Mine Type", height=460),
                          use_container_width=True)
 
         pivot2 = fdf.pivot_table(index="Year", columns="Region", values="Risk_Factor", aggfunc="mean")
-        fig = px.imshow(pivot2, color_continuous_scale="Oranges", aspect="auto",
+        fig = px.imshow(pivot2, color_continuous_scale=RISK_COLORSCALE, aspect="auto",
                          labels=dict(color="Avg Risk Factor"))
         st.plotly_chart(style_fig(fig, "Average Risk Factor by Year and Region", height=460),
                          use_container_width=True)
+
+        # ---- MineWatch project-defined monitoring indicator (display-only composite) ----
+        st.markdown("#### MineWatch Project-Defined Monitoring Indicator")
+        total_viol = fdf["Violations"].sum()
+        total_safety = fdf["Safety_Incidents"].sum()
+        total_pending = fdf["Pending_Actions"].sum()
+        total_env_breach = fdf["Environmental_Breach"].sum() if "Environmental_Breach" in fdf.columns else 0
+        parts = {"Violations": total_viol, "Safety": total_safety,
+                 "Pending": total_pending, "Environment": total_env_breach}
+        total_parts = sum(parts.values())
+        if total_parts > 0:
+            weights = {k: v / total_parts for k, v in parts.items()}
+            # simple bounded 0-100 composite: higher raw activity -> lower score (illustrative only)
+            score = max(0, min(100, 100 - (fdf["Risk_Factor"].mean() * 10)))
+            comp_rows = "".join(
+                f'<div class="mw-wc-row"><span class="mw-wc-label">{k}</span>'
+                f'<span class="mw-wc-value" style="color:{TEXT_SECONDARY};">{w*100:.0f}%</span></div>'
+                for k, w in weights.items()
+            )
+            st.markdown(f"""
+            <div class="mw-panel">
+                <div class="mw-eyebrow">MINEWATCH PROJECT-DEFINED</div>
+                <div class="mw-page-title" style="font-size:1.4rem;">Monitoring Indicator</div>
+                <div class="mw-kpi-value" style="font-size:2.1rem; margin: 6px 0;">{score:.0f} / 100</div>
+                {comp_rows}
+                <div class="mw-disclaimer">Project-defined analytical indicator. Not an official government
+                compliance or safety score.</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.caption("Not enough data in the current selection to compute the monitoring indicator.")
 
 
 # ==================================================
 # ENVIRONMENT
 # ==================================================
 elif page == "Environment":
-    st.title("Environmental Impact")
+    page_header("ANALYSIS", "Environmental Impact",
+                "Environmental impact and breaches relative to production and mine type.")
     if fdf.empty:
         empty_state()
     else:
         col1, col2 = st.columns(2)
         with col1:
             fig = px.scatter(fdf, x="Production", y="Environmental_Impact",
-                              color="Mine_Type", opacity=0.6)
+                              color="Mine_Type", opacity=0.7,
+                              color_discrete_sequence=[ENVIRONMENT, OPERATIONS, SECONDARY])
             st.plotly_chart(style_fig(fig, "Production vs Environmental Impact"), use_container_width=True)
         with col2:
             trend = fdf.groupby("Date", as_index=False)["Environmental_Impact"].mean()
             fig = px.line(trend, x="Date", y="Environmental_Impact")
+            fig.update_traces(line_color=PLOT_COLORS["environment"])
             st.plotly_chart(style_fig(fig, "Environmental Impact Trend"), use_container_width=True)
 
         breach = fdf.groupby("Year", as_index=False)["Environmental_Breach"].sum()
-        fig = px.bar(breach, x="Year", y="Environmental_Breach")
+        fig = px.bar(breach, x="Year", y="Environmental_Breach",
+                     color_discrete_sequence=[SAFETY])
         st.plotly_chart(style_fig(fig, "Environmental Breaches by Year"), use_container_width=True)
 
 
@@ -818,24 +1252,29 @@ elif page == "Environment":
 # ECONOMICS
 # ==================================================
 elif page == "Economics":
-    st.title("Economics")
-    st.caption("Understand operational economics: revenue, cost, profit and margin.")
+    page_header("ANALYSIS", "Economics",
+                "Operational economics: revenue, cost, profit and margin.")
     if fdf.empty:
         empty_state()
     else:
         econ = fdf.groupby("Date", as_index=False)[["Revenue", "Operating_Cost", "Profit"]].sum()
         fig = go.Figure()
-        for col, color in zip(["Revenue", "Operating_Cost", "Profit"], [ACCENT_2, WARN, ACCENT]):
-            fig.add_trace(go.Scatter(x=econ["Date"], y=econ[col], name=col, line=dict(color=color)))
+        for col, color in zip(["Revenue", "Operating_Cost", "Profit"],
+                               [PLOT_COLORS["revenue"], PLOT_COLORS["cost"], PLOT_COLORS["profit"]]):
+            width = 3 if col == "Profit" else 2
+            fig.add_trace(go.Scatter(x=econ["Date"], y=econ[col], name=col,
+                                      line=dict(color=color, width=width)))
         st.plotly_chart(style_fig(fig, "Revenue, Cost & Profit Over Time", height=460), use_container_width=True)
 
         margin = fdf.groupby("Date", as_index=False)["Profit_Margin"].mean()
         fig = px.line(margin, x="Date", y="Profit_Margin")
+        fig.update_traces(line_color=PLOT_COLORS["profit"])
         st.plotly_chart(style_fig(fig, "Average Profit Margin (%) Over Time"), use_container_width=True)
 
         by_commodity = fdf.groupby("Commodity", as_index=False).agg(
             Revenue=("Revenue", "sum"), Profit=("Profit", "sum"))
-        fig = px.bar(by_commodity, x="Commodity", y=["Revenue", "Profit"], barmode="group")
+        fig = px.bar(by_commodity, x="Commodity", y=["Revenue", "Profit"], barmode="group",
+                     color_discrete_map={"Revenue": PLOT_COLORS["revenue"], "Profit": PLOT_COLORS["profit"]})
         st.plotly_chart(style_fig(fig, "Revenue & Profit by Commodity"), use_container_width=True)
 
 
@@ -843,8 +1282,8 @@ elif page == "Economics":
 # REGIONAL PERFORMANCE
 # ==================================================
 elif page == "Regional Performance":
-    st.title("Regional Performance")
-    st.caption("Compare mining activity and productivity across regions.")
+    page_header("ANALYSIS", "Regional Performance",
+                "Compare mining activity and productivity across regions and states.")
     if fdf.empty:
         empty_state()
     else:
@@ -865,12 +1304,15 @@ elif page == "Regional Performance":
 # FORECASTING
 # ==================================================
 elif page == "Forecasting":
-    st.title("Experimental Forecasting")
-    st.caption(
-        "Experimental forecasting based on historical project data using a simple linear model. "
-        "This does NOT predict actual future mine production with certainty — it is a "
-        "classroom-level illustration of a forecasting approach."
-    )
+    page_header("ANALYSIS", "Experimental Forecasting",
+                "A simple linear projection of production, for illustration only.")
+    st.markdown("""
+    <div class="mw-info-box">
+    Experimental forecasting based on historical project data using a simple linear model.
+    This does NOT predict actual future mine production with certainty - it is a
+    classroom-level illustration of a forecasting approach.
+    </div>
+    """, unsafe_allow_html=True)
     if fdf.empty:
         empty_state()
     else:
@@ -900,23 +1342,27 @@ elif page == "Forecasting":
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=monthly["Date"], y=monthly["Production"],
-                                      name="Historical", line=dict(color=ACCENT_2)))
-            fig.add_trace(go.Scatter(x=future_dates, y=preds, name="Forecast",
-                                      line=dict(color=ACCENT, dash="dash")))
+                                      name="Historical (Actual)",
+                                      line=dict(color=PLOT_COLORS["historical"])))
+            fig.add_trace(go.Scatter(x=future_dates, y=preds, name="Experimental Forecast",
+                                      line=dict(color=PLOT_COLORS["forecast"], dash="dash")))
             st.plotly_chart(style_fig(fig, "Actual vs Forecast Production", height=460),
                              use_container_width=True)
-            st.caption(
-                "Model: simple linear trend fit on monthly aggregated production for the "
-                "current filter selection. No seasonality, external factors, or mine-level "
-                "detail is modeled."
-            )
+            st.markdown("""
+            <div class="mw-disclaimer">
+            Model: simple linear trend fit on monthly aggregated production for the current
+            filter selection. No seasonality, external factors, or mine-level detail is modeled.
+            Experimental historical projection - this forecast is not a guarantee of future production.
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # ==================================================
 # MINE EXPLORER
 # ==================================================
 elif page == "Mine Explorer":
-    st.title("Mine Explorer")
+    page_header("ANALYSIS", "Mine Explorer",
+                "A detailed profile of production, safety, environmental and economic performance for one mine.")
     mine_options = sorted(df["Mine_ID"].unique())
     selected_mine = st.selectbox("Select a mine", mine_options)
 
@@ -927,61 +1373,82 @@ elif page == "Mine Explorer":
         profile = mdf.iloc[0]
         st.markdown(f"""
         <div class="mw-panel">
-        <b>{profile['Mine_Name']}</b> &nbsp; <span class="mw-badge">{selected_mine}</span><br><br>
-        Region: {profile['Region']} &nbsp;|&nbsp; State: {profile['State']} &nbsp;|&nbsp;
-        Type: {profile['Mine_Type']} &nbsp;|&nbsp; Commodity: {profile['Commodity']}
+            <div class="mw-eyebrow">MINE PROFILE</div>
+            <div class="mw-page-title" style="font-size:1.3rem;">{profile['Mine_Name']}
+                <span class="mw-badge mw-badge-blue">{selected_mine}</span>
+            </div>
+            <div class="mw-profile-grid">
+                <div><div class="mw-profile-item-label">Region</div><div class="mw-profile-item-value">{profile['Region']}</div></div>
+                <div><div class="mw-profile-item-label">State</div><div class="mw-profile-item-value">{profile['State']}</div></div>
+                <div><div class="mw-profile-item-label">Mine Type</div><div class="mw-profile-item-value">{profile['Mine_Type']}</div></div>
+                <div><div class="mw-profile-item-label">Commodity</div><div class="mw-profile-item-value">{profile['Commodity']}</div></div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            kpi_card("Total Production", format_num(mdf["Production"].sum()), "tonnes")
+            kpi_card("Production", format_num(mdf["Production"].sum()), "tonnes",
+                      accent=PLOT_COLORS["production"])
         with c2:
-            kpi_card("Avg Productivity", f"{mdf['Productivity_Index'].mean():.2f}", "tonnes/hour")
+            kpi_card("Productivity", f"{mdf['Productivity_Index'].mean():.2f}", "tonnes/hour",
+                      accent=PLOT_COLORS["productivity"])
         with c3:
-            kpi_card("Safety Incidents", f"{int(mdf['Safety_Incidents'].sum())}", "")
+            kpi_card("Safety Incidents", f"{int(mdf['Safety_Incidents'].sum())}", "",
+                      accent=PLOT_COLORS["safety"])
         with c4:
-            kpi_card("Violations", f"{int(mdf['Violations'].sum())}", "")
+            kpi_card("Violations", f"{int(mdf['Violations'].sum())}", "",
+                      accent=PLOT_COLORS["violations"])
 
         c5, c6, c7, c8 = st.columns(4)
         with c5:
-            kpi_card("Avg Environmental Impact", f"{mdf['Environmental_Impact'].mean():.2f}", "")
+            kpi_card("Environmental Impact", f"{mdf['Environmental_Impact'].mean():.2f}", "avg",
+                      accent=PLOT_COLORS["environment"])
         with c6:
-            kpi_card("Avg Energy Intensity", f"{mdf['Energy_Intensity'].mean():.3f}", "")
+            kpi_card("Energy Intensity", f"{mdf['Energy_Intensity'].mean():.3f}", "avg",
+                      accent=PLOT_COLORS["energy"])
         with c7:
-            kpi_card("Avg Waste Intensity", f"{mdf['Waste_Intensity'].mean():.3f}", "")
+            kpi_card("Waste Intensity", f"{mdf['Waste_Intensity'].mean():.3f}", "avg",
+                      accent=PLOT_COLORS["waste"])
         with c8:
-            kpi_card("Pending Actions", f"{int(mdf['Pending_Actions'].sum())}", "")
+            kpi_card("Pending Actions", f"{int(mdf['Pending_Actions'].sum())}", "",
+                      accent=PLOT_COLORS["pending"])
 
         c9, c10, c11 = st.columns(3)
         with c9:
-            kpi_card("Total Revenue", format_num(mdf["Revenue"].sum()), "")
+            kpi_card("Total Revenue", format_num(mdf["Revenue"].sum()), "", accent=PLOT_COLORS["revenue"])
         with c10:
-            kpi_card("Total Operating Cost", format_num(mdf["Operating_Cost"].sum()), "")
+            kpi_card("Total Operating Cost", format_num(mdf["Operating_Cost"].sum()), "", accent=PLOT_COLORS["cost"])
         with c11:
-            kpi_card("Total Profit", format_num(mdf["Profit"].sum()), "")
+            kpi_card("Total Profit", format_num(mdf["Profit"].sum()), "", accent=PLOT_COLORS["profit"])
 
+        st.markdown("#### Performance Over Time")
         tab1, tab2, tab3, tab4, tab5 = st.tabs(
             ["Production", "Safety", "Environmental", "Energy & Waste", "Profitability"])
         with tab1:
             fig = px.line(mdf.sort_values("Date"), x="Date", y="Production")
+            fig.update_traces(line_color=PLOT_COLORS["production"])
             st.plotly_chart(style_fig(fig), use_container_width=True)
         with tab2:
             fig = px.line(mdf.sort_values("Date"), x="Date", y="Safety_Incidents")
-            fig.update_traces(line_color=WARN)
+            fig.update_traces(line_color=PLOT_COLORS["safety"])
             st.plotly_chart(style_fig(fig), use_container_width=True)
         with tab3:
             fig = px.line(mdf.sort_values("Date"), x="Date", y="Environmental_Impact")
+            fig.update_traces(line_color=PLOT_COLORS["environment"])
             st.plotly_chart(style_fig(fig), use_container_width=True)
         with tab4:
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=mdf.sort_values("Date")["Date"],
-                                      y=mdf.sort_values("Date")["Energy_Intensity"], name="Energy Intensity"))
+                                      y=mdf.sort_values("Date")["Energy_Intensity"], name="Energy Intensity",
+                                      line=dict(color=PLOT_COLORS["energy"])))
             fig.add_trace(go.Scatter(x=mdf.sort_values("Date")["Date"],
-                                      y=mdf.sort_values("Date")["Waste_Intensity"], name="Waste Intensity"))
+                                      y=mdf.sort_values("Date")["Waste_Intensity"], name="Waste Intensity",
+                                      line=dict(color=PLOT_COLORS["waste"], dash="dot")))
             st.plotly_chart(style_fig(fig), use_container_width=True)
         with tab5:
             fig = px.line(mdf.sort_values("Date"), x="Date", y="Profit")
+            fig.update_traces(line_color=PLOT_COLORS["profit"])
             st.plotly_chart(style_fig(fig), use_container_width=True)
 
         st.markdown("#### Mine Insight")
@@ -996,12 +1463,15 @@ elif page == "Mine Explorer":
                 prod_change = pct_change(last["Production"], first["Production"])
                 inc_change = pct_change(last["Safety_Incidents"], first["Safety_Incidents"])
                 viol_change = pct_change(last["Violations"], first["Violations"])
-                st.markdown(f"""
-                <div class="mw-finding">Production changed by {prod_change:+.1f}% from
-                {yearly.index.min()} to {yearly.index.max()}.</div>
-                <div class="mw-finding">Safety incidents changed by {inc_change:+.1f}% over the same period.</div>
-                <div class="mw-finding">Violations changed by {viol_change:+.1f}% over the same period.</div>
-                """, unsafe_allow_html=True)
+                finding_card("PRODUCTION",
+                              f"Production changed by {prod_change:+.1f}% from {yearly.index.min()} to {yearly.index.max()}.",
+                              accent=PLOT_COLORS["production"])
+                finding_card("SAFETY",
+                              f"Safety incidents changed by {inc_change:+.1f}% over the same period.",
+                              accent=PLOT_COLORS["safety"])
+                finding_card("VIOLATIONS",
+                              f"Violations changed by {viol_change:+.1f}% over the same period.",
+                              accent=PLOT_COLORS["violations"])
             else:
                 st.caption("Not enough years of data in the current selection to compute a trend insight.")
 
@@ -1010,8 +1480,8 @@ elif page == "Mine Explorer":
 # AI INSIGHTS
 # ==================================================
 elif page == "AI Insights":
-    st.title("AI Insights")
-    st.caption("AI-generated analytical observation. Optional layer — falls back to rule-based logic if no API key is configured.")
+    page_header("TOOLS", "AI Insights",
+                "AI-generated analytical observation, with a rule-based fallback when no API key is configured.")
 
     if fdf.empty:
         empty_state()
@@ -1038,24 +1508,32 @@ elif page == "AI Insights":
                 "waste_intensity_change_pct": round(float(wc_df.loc[wc_df.Metric == "Waste Intensity", "Change %"].iloc[0] or 0), 2),
             }
 
-            st.markdown("#### Structured summary sent for analysis")
-            st.json(summary)
+            with st.expander("Structured summary sent for analysis"):
+                st.json(summary)
 
             def rule_based_insight(s):
                 lines = []
                 lines.append(
-                    f"Key observation: production changed {s['production_change_pct']:+.1f}% "
-                    f"and productivity changed {s['productivity_change_pct']:+.1f}% between "
-                    f"{prev_y} and {last_y}.")
+                    ("KEY OBSERVATION",
+                     f"Production changed {s['production_change_pct']:+.1f}% "
+                     f"and productivity changed {s['productivity_change_pct']:+.1f}% between "
+                     f"{prev_y} and {last_y}.")
+                )
                 lines.append(
-                    f"Important trend: safety incidents changed {s['incident_change_pct']:+.1f}% "
-                    f"while violations changed {s['violation_change_pct']:+.1f}% over the same period.")
+                    ("IMPORTANT TREND",
+                     f"Safety incidents changed {s['incident_change_pct']:+.1f}% "
+                     f"while violations changed {s['violation_change_pct']:+.1f}% over the same period.")
+                )
                 if s["top_violation_category"]:
-                    lines.append(f"Recurring issue: '{s['top_violation_category']}' is the most "
-                                 f"frequently recorded violation category in the current selection.")
+                    lines.append(
+                        ("RECURRING ISSUE",
+                         f"'{s['top_violation_category']}' is the most frequently recorded violation "
+                         f"category in the current selection.")
+                    )
                 lines.append(
-                    f"Area requiring monitoring: {s['pending_actions']} corrective actions remain "
-                    f"pending across the selected mines.")
+                    ("AREA REQUIRING MONITORING",
+                     f"{s['pending_actions']} corrective actions remain pending across the selected mines.")
+                )
                 return lines
 
             ai_used = False
@@ -1082,41 +1560,47 @@ elif page == "AI Insights":
                     if resp.status_code == 200:
                         data = resp.json()
                         text = data["candidates"][0]["content"]["parts"][0]["text"]
-                        insight_lines = [ln.strip("-• ").strip() for ln in text.split("\n") if ln.strip()]
-                        ai_used = True
+                        raw_lines = [ln.strip("-• ").strip() for ln in text.split("\n") if ln.strip()]
+                        labels = ["KEY OBSERVATION", "IMPORTANT TREND", "RECURRING ISSUE", "AREA REQUIRING MONITORING"]
+                        insight_lines = list(zip(labels, raw_lines[:4])) if raw_lines else None
+                        ai_used = insight_lines is not None
                 except Exception:
                     ai_used = False
 
-            st.markdown("#### Analytical Observation")
+            st.markdown("""
+            <div class="mw-eyebrow" style="color:%s;">AI-GENERATED ANALYTICAL OBSERVATION</div>
+            """ % SECONDARY, unsafe_allow_html=True)
+
             if ai_used and insight_lines:
-                st.markdown('<span class="mw-badge">AI-generated analytical observation</span>',
-                            unsafe_allow_html=True)
-                for ln in insight_lines:
-                    st.markdown(f'<div class="mw-finding">{ln}</div>', unsafe_allow_html=True)
+                st.markdown('<span class="mw-badge">AI-generated</span>', unsafe_allow_html=True)
+                for cat, ln in insight_lines:
+                    finding_card(cat, ln, accent=SECONDARY)
             else:
                 if GEMINI_API_KEY:
-                    st.caption("AI request unavailable or failed — showing rule-based analytical observations.")
+                    st.caption("AI request unavailable or failed - showing rule-based analytical observations.")
                 else:
                     st.caption("AI API not configured. Showing rule-based analytical observations.")
-                for ln in rule_based_insight(summary):
-                    st.markdown(f'<div class="mw-finding">{ln}</div>', unsafe_allow_html=True)
+                for cat, ln in rule_based_insight(summary):
+                    finding_card(cat, ln, accent=SECONDARY)
+
+            st.markdown("""
+            <div class="mw-disclaimer">This AI/rule-based layer is analytical and observational only -
+            it does not control the dashboard, alter underlying data, or issue compliance determinations.</div>
+            """, unsafe_allow_html=True)
 
         st.markdown("---")
         st.markdown("### What Changed?")
         result = what_changed(fdf, "Year")
         if result:
-            wc_df, prev_y, last_y = result
-            display_df = wc_df.copy()
-            display_df["Change %"] = display_df["Change %"].apply(
-                lambda v: f"{v:+.1f}%" if v is not None else "-")
-            st.dataframe(display_df, use_container_width=True, hide_index=True)
+            what_changed_panel(*result)
 
 
 # ==================================================
 # DATA EXPLORER
 # ==================================================
 elif page == "Data Explorer":
-    st.title("Data Explorer")
+    page_header("TOOLS", "Data Explorer",
+                "Inspect the cleaning pipeline, filtered dataset and descriptive statistics.")
 
     st.markdown("#### Data Cleaning Methodology")
     st.markdown(f"""
@@ -1134,28 +1618,36 @@ elif page == "Data Explorer":
     if fdf.empty:
         empty_state()
     else:
-        c1, c2, c3 = st.columns(3)
+        c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.metric("Rows", f"{len(fdf):,}")
+            kpi_card("Rows", f"{len(fdf):,}", "filtered", accent=NEUTRAL)
         with c2:
-            st.metric("Columns", f"{fdf.shape[1]}")
+            kpi_card("Columns", f"{fdf.shape[1]}", "", accent=NEUTRAL)
         with c3:
-            st.metric("Missing values", f"{int(fdf.isna().sum().sum()):,}")
+            kpi_card("Missing Values", f"{int(fdf.isna().sum().sum()):,}", "", accent=NEUTRAL)
+        with c4:
+            kpi_card("Duplicates Removed", f"{clean_stats['duplicates_found']:,}", "at load time", accent=NEUTRAL)
 
-        st.dataframe(fdf, use_container_width=True, height=380)
-
-        st.markdown("#### Descriptive Statistics")
-        st.dataframe(fdf.describe().T, use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        tab_raw, tab_filtered, tab_stats = st.tabs(["Raw (sample)", "Filtered Data", "Descriptive Statistics"])
+        with tab_raw:
+            st.dataframe(raw_df.head(200), use_container_width=True, height=320)
+        with tab_filtered:
+            st.dataframe(fdf, use_container_width=True, height=380)
+        with tab_stats:
+            st.dataframe(fdf.describe().T, use_container_width=True)
 
         csv = fdf.to_csv(index=False).encode("utf-8")
-        st.download_button("\u2B07 Download Filtered CSV", csv, "minewatch_filtered.csv", "text/csv")
+        st.download_button("\u2B07 Download Filtered CSV", csv, "minewatch_filtered.csv", "text/csv",
+                            type="primary", use_container_width=False)
 
 
 # ==================================================
 # ABOUT PROJECT
 # ==================================================
 elif page == "About Project":
-    st.title("About MineWatch V2")
+    page_header("TOOLS", "About MineWatch V2",
+                "Project positioning, dataset description and known limitations.")
     st.markdown("""
     <div class="mw-panel">
     <b>MineWatch</b> is an interactive Python-based EDA platform for analysing mining
@@ -1188,7 +1680,7 @@ elif page == "About Project":
     - Forecasting is experimental (simple linear trend) and does not predict actual
       future production
     - The "MineWatch Analytical Indicator" (where shown) is a project-defined,
-      transparent composite score — not an official compliance or safety score
+      transparent composite score - not an official compliance or safety score
     - Correlation shown throughout the dashboard indicates association, not causation
     - AI Insights are optional and constrained to a structured data summary; if no
       API key is configured, rule-based analytical observations are shown instead
